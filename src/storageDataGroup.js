@@ -319,8 +319,7 @@ class StorageDataGroup {
                     reject(new Error(`${opts.host}:${e.message}`));
                 });
 
-                req.write(JSON.stringify(payload));
-                req.end();
+                req.end(JSON.stringify(payload));
             }))
             .then((response) => {
                 if (response.status !== 200) {
