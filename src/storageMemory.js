@@ -42,12 +42,6 @@ class StorageMemory {
     persist() {
         return Promise.resolve();
     }
-
-    static createForTest() {
-        return new this({
-            hello: 'world'
-        });
-    }
 }
 
 module.exports = StorageMemory;
