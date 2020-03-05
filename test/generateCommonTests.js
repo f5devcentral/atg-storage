@@ -28,7 +28,7 @@ module.exports = function generateCommonTests(createStorage) {
             return Promise.resolve()
                 .then(() => storage.keys())
                 .then((keys) => {
-                    assert(keys.includes('hello'));
+                    assert(keys.indexOf('hello') > -1);
                 });
         });
     });
@@ -76,7 +76,7 @@ module.exports = function generateCommonTests(createStorage) {
                 .then(() => storage.deleteItem('hello'))
                 .then(() => storage.keys())
                 .then((keys) => {
-                    assert(!keys.includes('hello'));
+                    assert(keys.indexOf('hello') < 0);
                 });
         });
     });
