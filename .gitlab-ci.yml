@@ -1,0 +1,50 @@
+image: node:8
+
+stages:
+    - test
+
+lint:
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm ci
+        - npm run lint
+
+test_node4:
+    image: node:4
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm install --global npm@5.10.0
+        - npm install
+        - npm install mocha@5.2.0
+        - npm test
+
+test_node6:
+    image: node:6
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm install --global npx
+        - npm install
+        - npm test
+
+test_node8:
+    image: node:8
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm ci
+        - npm test
+
+coverage:
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm ci
+        - npm run coverage
