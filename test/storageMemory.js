@@ -7,7 +7,8 @@ const generateCommonTests = require('./generateCommonTests');
 describe('StorageMemory', () => {
     function createStorage() {
         return new StorageMemory({
-            hello: 'world'
+            hello: 'world',
+            world: 'hello'
         });
     }
 

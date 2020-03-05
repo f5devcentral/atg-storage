@@ -76,7 +76,8 @@ module.exports = function generateCommonTests(createStorage) {
                 .then(() => storage.deleteItem('hello'))
                 .then(() => storage.keys())
                 .then((keys) => {
-                    assert(keys.indexOf('hello') < 0);
+                    assert(keys.indexOf('hello') < 0, 'hello was not deleted');
+                    assert(keys.indexOf('world') > -1, 'world was deleted');
                 });
         });
     });
