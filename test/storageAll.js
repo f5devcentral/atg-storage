@@ -35,7 +35,7 @@ allStorageClasses.forEach((StorageClass) => {
                 return Promise.resolve()
                     .then(() => storage.keys())
                     .then((keys) => {
-                        assert(keys.includes('hello'));
+                        assert(keys.indexOf('hello') > -1);
                     });
             });
         });
@@ -83,7 +83,7 @@ allStorageClasses.forEach((StorageClass) => {
                     .then(() => storage.deleteItem('hello'))
                     .then(() => storage.keys())
                     .then((keys) => {
-                        assert(!keys.includes('hello'));
+                        assert(keys.indexOf('hello') < 0);
                     });
             });
         });

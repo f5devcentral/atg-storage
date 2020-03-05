@@ -15,7 +15,7 @@ function fromBase64(input) {
 }
 
 function filterDuplicateResourceError(error) {
-    if (!error.message.includes('already exists')) {
+    if (error.message.indexOf('already exists') < 0) {
         throw error;
     }
 }
@@ -207,7 +207,7 @@ class StorageDataGroup {
             .then(() => this._getRecords())
             .then((currentRecords) => {
                 const recordNamesToDelete = recordsToKeys(currentRecords)[keyName];
-                const records = currentRecords.filter(x => !recordNamesToDelete.includes(x.name));
+                const records = currentRecords.filter(x => recordNamesToDelete.indexOf(x.name) < 0);
 
                 if (this.cache) {
                     this.cache.records = records.reduce((acc, curr) => {
