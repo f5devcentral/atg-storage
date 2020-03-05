@@ -329,10 +329,6 @@ class StorageDataGroup {
                 return Promise.resolve();
             });
     }
-
-    static createForTest() {
-        return new this('/storage/data-store');
-    }
 }
 
 module.exports = StorageDataGroup;

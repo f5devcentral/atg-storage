@@ -1,9 +1,15 @@
 'use strict';
 
+const childProcess = require('child_process');
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+const sinon = require('sinon');
+const stripIndent = require('common-tags').stripIndent;
 
 const StorageDataGroup = require('../src/storageDataGroup');
+
+const generateCommonTests = require('./generateCommonTests');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -14,6 +20,74 @@ describe('StorageDataGroup', () => {
         return new StorageDataGroup('/storage/data-store');
     }
 
+    let tmshCommands = {};
+    let overrideCommands = null;
+
+    beforeEach(() => {
+        let isFolderCreated = false;
+        let isDataGroupCreated = false;
+        const defaultCommands = {
+            'create sys folder': (callback) => {
+                if (isFolderCreated) {
+                    isFolderCreated = false;
+                    throw new Error('folder already exists');
+                }
+                isFolderCreated = true;
+                callback();
+            },
+            'create ltm data-group': (callback) => {
+                if (isDataGroupCreated) {
+                    isDataGroupCreated = false;
+                    throw new Error('folder already exists');
+                }
+                isDataGroupCreated = true;
+                callback();
+            },
+            'list ltm data-group': (callback) => {
+                const data = stripIndent`
+                ltm data-group internal /storage/data-store {
+                    records {
+                        hello0 {
+                            data eNpTKs8vyklRAgAJ4AJt
+                        }
+                        world0 {
+                            data eNpTKs8vyklRAgAJ4AJt
+                        }
+                    }
+                    type string
+                }
+            `;
+                callback(null, data);
+            }
+        };
+
+        sinon.stub(childProcess, 'exec').callsFake((command, callback) => {
+            let foundCmd = false;
+            let commands = overrideCommands;
+            if (!commands) {
+                commands = Object.assign({}, defaultCommands, tmshCommands);
+            }
+            Object.keys(commands).forEach((cmdstr) => {
+                if (command.includes(cmdstr)) {
+                    commands[cmdstr](callback, command);
+                    foundCmd = true;
+                }
+            });
+
+            if (!foundCmd) {
+                callback();
+            }
+        });
+    });
+
+    afterEach(() => {
+        tmshCommands = {};
+        overrideCommands = null;
+        sinon.restore();
+    });
+
+    generateCommonTests(createStorage);
+
     describe('Init', () => {
         it('should error if init fails', () => {
             const storage = createStorage();
@@ -21,14 +95,14 @@ describe('StorageDataGroup', () => {
             const folderError = 'unable to create folder';
             const dataGroupError = 'unable to create data group';
             let isFolderTested = false;
-            process.tmshcmds['create sys folder'] = (callback) => {
+            tmshCommands['create sys folder'] = (callback) => {
                 if (!isFolderTested) {
                     isFolderTested = true;
                     throw new Error(folderError);
                 }
                 callback();
             };
-            process.tmshcmds['create ltm data-group'] = () => {
+            tmshCommands['create ltm data-group'] = () => {
                 throw new Error(dataGroupError);
             };
 
@@ -49,7 +123,7 @@ describe('StorageDataGroup', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            process.tmshcmds = {
+            overrideCommands = {
                 '': () => {
                     throw new Error(errorString);
                 }
@@ -62,7 +136,7 @@ describe('StorageDataGroup', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            process.tmshcmds = {
+            overrideCommands = {
                 '': callback => callback(new Error(errorString))
             };
 
@@ -73,7 +147,7 @@ describe('StorageDataGroup', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            process.tmshcmds = {
+            overrideCommands = {
                 '': callback => callback(null, '', new Error(errorString))
             };
 
@@ -86,7 +160,7 @@ describe('StorageDataGroup', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            process.tmshcmds = {
+            overrideCommands = {
                 '': () => {
                     throw new Error(errorString);
                 }
@@ -99,7 +173,7 @@ describe('StorageDataGroup', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            process.tmshcmds = {
+            overrideCommands = {
                 '': callback => callback(new Error(errorString))
             };
 
@@ -110,7 +184,7 @@ describe('StorageDataGroup', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            process.tmshcmds = {
+            overrideCommands = {
                 '': callback => callback(null, '', new Error(errorString))
             };
 
