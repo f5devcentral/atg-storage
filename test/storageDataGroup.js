@@ -2,163 +2,168 @@
 
 const childProcess = require('child_process');
 
-const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+const sinon = require('sinon');
 
 const StorageDataGroup = require('../src/storageDataGroup');
+
+const generateCommonTests = require('./generateCommonTests');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 
 describe('StorageDataGroup', () => {
-    afterEach(() => {
-        sinon.restore();
-    });
-
     function createStorage() {
         return new StorageDataGroup('/storage/data-store');
     }
 
-    it('should lazy init data group', () => {
-        const storage = createStorage();
+    let tmshCommands = {};
+    let overrideCommands = null;
 
+    beforeEach(() => {
         let isFolderCreated = false;
         let isDataGroupCreated = false;
-        sinon.stub(childProcess, 'exec').callsFake((command, callback) => {
-            if (command.includes('create sys folder /storage')) {
+        const defaultCommands = {
+            'create sys folder': (callback) => {
                 if (isFolderCreated) {
                     isFolderCreated = false;
                     throw new Error('folder already exists');
                 }
                 isFolderCreated = true;
-            } else if (command.includes('create ltm data-group internal /storage/data-store type string')) {
+                callback();
+            },
+            'create ltm data-group': (callback) => {
                 if (isDataGroupCreated) {
                     isDataGroupCreated = false;
                     throw new Error('folder already exists');
                 }
                 isDataGroupCreated = true;
+                callback();
+            },
+            'list ltm data-group': (callback) => {
+                const data = [
+                    'ltm data-group internal /storage/data-store {',
+                    '    records {',
+                    '        hello0 {',
+                    '            data eNpTKs8vyklRAgAJ4AJt',
+                    '        }',
+                    '        world0 {',
+                    '            data eNpTKs8vyklRAgAJ4AJt',
+                    '        }',
+                    '    }',
+                    '    type string',
+                    '}'
+                ].join('\n');
+                callback(null, data);
             }
-            callback();
-        });
+        };
 
-        return Promise.resolve()
-            .then(() => storage.setItem('hello', 'world'))
-            .then(() => {
-                assert.equal(isFolderCreated, true);
-                assert.equal(isDataGroupCreated, true);
-            })
-            .then(() => storage.setItem('hello', 'everyone'))
-            .then(() => {
-                assert.equal(isFolderCreated, false);
-                assert.equal(isDataGroupCreated, false);
+        sinon.stub(childProcess, 'exec').callsFake((command, callback) => {
+            let foundCmd = false;
+            let commands = overrideCommands;
+            if (!commands) {
+                commands = Object.assign({}, defaultCommands, tmshCommands);
+            }
+            Object.keys(commands).forEach((cmdstr) => {
+                if (command.includes(cmdstr)) {
+                    commands[cmdstr](callback, command);
+                    foundCmd = true;
+                }
             });
+
+            if (!foundCmd) {
+                callback();
+            }
+        });
     });
 
-    it('should error if init fails', () => {
-        const storage = createStorage();
+    afterEach(() => {
+        tmshCommands = {};
+        overrideCommands = null;
+        sinon.restore();
+    });
 
-        const folderError = 'unable to create folder';
-        const dataGroupError = 'unable to create data group';
-        let isFolderTested = false;
-        sinon.stub(childProcess, 'exec').callsFake((command, callback) => {
-            if (command.includes('create sys folder /storage')) {
+    generateCommonTests(createStorage);
+
+    describe('Init', () => {
+        it('should error if init fails', () => {
+            const storage = createStorage();
+
+            const folderError = 'unable to create folder';
+            const dataGroupError = 'unable to create data group';
+            let isFolderTested = false;
+            tmshCommands['create sys folder'] = (callback) => {
                 if (!isFolderTested) {
                     isFolderTested = true;
                     throw new Error(folderError);
                 }
-            } else if (command.includes('create ltm data-group internal /storage/data-store type string')) {
-                throw new Error(dataGroupError);
-            }
-            callback();
-        });
-
-        return Promise.resolve()
-            .then(() => assert.isRejected(
-                storage.setItem('hello', 'world'),
-                folderError
-            ))
-            .then(() => assert.isRejected(
-                storage.setItem('hello', 'world'),
-                dataGroupError
-            ));
-    });
-
-    describe('.setItem()', () => {
-        it('should reject on missing keyName', () => {
-            const storage = createStorage();
-            return assert.isRejected(storage.setItem(), 'keyName');
-        });
-
-        it('should reject if exec throws', () => {
-            const storage = createStorage();
-
-            const errorString = 'exec error';
-            sinon.stub(childProcess, 'exec').callsFake(() => {
-                throw new Error(errorString);
-            });
-
-            return assert.isRejected(storage.setItem('test'), errorString);
-        });
-
-        it('should reject if exec errors', () => {
-            const storage = createStorage();
-
-            const errorString = 'exec error';
-            sinon.stub(childProcess, 'exec').callsFake((_, callback) => {
-                callback(new Error(errorString));
-            });
-
-            return assert.isRejected(storage.setItem('test'), errorString);
-        });
-
-        it('should reject if exec prints to stderr', () => {
-            const storage = createStorage();
-
-            const errorString = 'exec error';
-            sinon.stub(childProcess, 'exec').callsFake((_, callback) => {
-                callback(null, '', new Error(errorString));
-            });
-
-            return assert.isRejected(storage.setItem('test'), errorString);
-        });
-
-        it('should call tmsh to store data', () => {
-            const storage = createStorage();
-
-            let tmshCommand = null;
-            sinon.stub(childProcess, 'exec').callsFake((command, callback) => {
-                if (command.includes('modify ltm data-group')) {
-                    tmshCommand = command;
-                }
                 callback();
-            });
+            };
+            tmshCommands['create ltm data-group'] = () => {
+                throw new Error(dataGroupError);
+            };
 
-            const key = 'hello';
-            const value = 'world';
             return Promise.resolve()
-                .then(() => storage.setItem(key, value))
-                .then(() => assert.strictEqual(
-                    tmshCommand,
-                    'tmsh -a modify ltm data-group internal /storage/data-store records replace-all-with { hello0 { data eNpTKs8vyklRAgAJ4AJt } }'
+                .then(() => assert.isRejected(
+                    storage.setItem('hello', 'world'),
+                    folderError
+                ))
+                .then(() => assert.isRejected(
+                    storage.setItem('hello', 'world'),
+                    dataGroupError
                 ));
         });
     });
 
-    describe('.getItem()', () => {
-        it('should reject on missing keyName', () => {
-            const storage = createStorage();
-            return assert.isRejected(storage.getItem(), 'keyName');
-        });
-
+    describe('.setItem()', () => {
         it('should reject if exec throws', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            sinon.stub(childProcess, 'exec').callsFake(() => {
-                throw new Error(errorString);
-            });
+            overrideCommands = {
+                '': () => {
+                    throw new Error(errorString);
+                }
+            };
+
+            return assert.isRejected(storage.setItem('test'), errorString);
+        });
+
+        it('should reject if exec errors', () => {
+            const storage = createStorage();
+
+            const errorString = 'exec error';
+            overrideCommands = {
+                '': callback => callback(new Error(errorString))
+            };
+
+            return assert.isRejected(storage.setItem('test'), errorString);
+        });
+
+        it('should reject if exec prints to stderr', () => {
+            const storage = createStorage();
+
+            const errorString = 'exec error';
+            overrideCommands = {
+                '': callback => callback(null, '', new Error(errorString))
+            };
+
+            return assert.isRejected(storage.setItem('test'), errorString);
+        });
+    });
+
+    describe('.getItem()', () => {
+        it('should reject if exec throws', () => {
+            const storage = createStorage();
+
+            const errorString = 'exec error';
+            overrideCommands = {
+                '': () => {
+                    throw new Error(errorString);
+                }
+            };
 
             return assert.isRejected(storage.getItem('test'), errorString);
         });
@@ -167,9 +172,9 @@ describe('StorageDataGroup', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            sinon.stub(childProcess, 'exec').callsFake((_, callback) => {
-                callback(new Error(errorString));
-            });
+            overrideCommands = {
+                '': callback => callback(new Error(errorString))
+            };
 
             return assert.isRejected(storage.getItem('test'), errorString);
         });
@@ -178,36 +183,11 @@ describe('StorageDataGroup', () => {
             const storage = createStorage();
 
             const errorString = 'exec error';
-            sinon.stub(childProcess, 'exec').callsFake((_, callback) => {
-                callback(null, '', new Error(errorString));
-            });
+            overrideCommands = {
+                '': callback => callback(null, '', new Error(errorString))
+            };
 
             return assert.isRejected(storage.getItem('test'), errorString);
-        });
-
-        it('should call tmsh to retrieve data', () => {
-            const storage = createStorage();
-
-            sinon.stub(childProcess, 'exec').callsFake((command, callback) => {
-                if (command.includes('list ltm data-group')) {
-                    callback(null, [
-                        'ltm data-group internal /storage/data-store {',
-                        '    records {',
-                        '        bad0 {',
-                        '            data ":("',
-                        '        }',
-                        '        hello0 {',
-                        '            data "eNpTKs8vyklRAgAJ4AJt"',
-                        '        }',
-                        '    }',
-                        '}'
-                    ].join('\n'));
-                    return;
-                }
-                callback();
-            });
-
-            return assert.becomes(storage.getItem('hello'), 'world');
         });
     });
 });

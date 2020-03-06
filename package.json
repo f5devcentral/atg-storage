@@ -2,7 +2,7 @@
   "name": "atg-storage",
   "version": "1.0.0",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint src test",
     "test": "mocha",
     "coverage": "nyc npm test"
   },
