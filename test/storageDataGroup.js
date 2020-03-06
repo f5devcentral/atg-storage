@@ -5,7 +5,6 @@ const childProcess = require('child_process');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const stripIndent = require('common-tags').stripIndent;
 
 const StorageDataGroup = require('../src/storageDataGroup');
 
@@ -44,19 +43,19 @@ describe('StorageDataGroup', () => {
                 callback();
             },
             'list ltm data-group': (callback) => {
-                const data = stripIndent`
-                ltm data-group internal /storage/data-store {
-                    records {
-                        hello0 {
-                            data eNpTKs8vyklRAgAJ4AJt
-                        }
-                        world0 {
-                            data eNpTKs8vyklRAgAJ4AJt
-                        }
-                    }
-                    type string
-                }
-            `;
+                const data = [
+                    'ltm data-group internal /storage/data-store {',
+                    '    records {',
+                    '        hello0 {',
+                    '            data eNpTKs8vyklRAgAJ4AJt',
+                    '        }',
+                    '        world0 {',
+                    '            data eNpTKs8vyklRAgAJ4AJt',
+                    '        }',
+                    '    }',
+                    '    type string',
+                    '}'
+                ].join('\n');
                 callback(null, data);
             }
         };
