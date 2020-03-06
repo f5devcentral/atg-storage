@@ -15,8 +15,13 @@
       "no-control-regex": "off"
     }
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@f5devcentral/eslint-config-f5-atg": "^0.1.1",
+    "@stryker-mutator/core": "^2.5.0",
+    "@stryker-mutator/javascript-mutator": "^2.5.0",
+    "@stryker-mutator/mocha-framework": "^2.5.0",
+    "@stryker-mutator/mocha-runner": "^2.5.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "eslint": "^6.8.0",
@@ -24,11 +29,5 @@
     "nyc": "^15.0.0",
     "sinon": "^7.5.0",
     "stryker-cli": "^1.0.0"
-  },
-  "devDependencies": {
-    "@stryker-mutator/core": "^2.5.0",
-    "@stryker-mutator/javascript-mutator": "^2.5.0",
-    "@stryker-mutator/mocha-framework": "^2.5.0",
-    "@stryker-mutator/mocha-runner": "^2.5.0"
   }
 }
