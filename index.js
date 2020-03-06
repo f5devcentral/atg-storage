@@ -1,7 +1,7 @@
 'use strict';
 
-const StorageMemory = require('./storageMemory');
-const StorageDataGroup = require('./storageDataGroup');
+const StorageMemory = require('./src/storageMemory');
+const StorageDataGroup = require('./src/storageDataGroup');
 
 module.exports = {
     StorageMemory,
