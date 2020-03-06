@@ -1,6 +1,9 @@
 {
   "name": "atg-storage",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "author": "F5 Networks",
+  "license": "Apache-2.0",
+  "main": "index.js",
   "scripts": {
     "lint": "eslint src test",
     "test": "mocha",
