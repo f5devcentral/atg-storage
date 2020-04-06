@@ -10,8 +10,8 @@
     "coverage": "nyc npm test"
   },
   "files": [
-      "index.js",
-      "src"
+    "index.js",
+    "src"
   ],
   "eslintConfig": {
     "extends": "@f5devcentral/eslint-config-f5-atg",
