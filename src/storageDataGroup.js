@@ -78,7 +78,10 @@ function updateDataGroup(path, records) {
         .map(record => `${record.name} { data ${record.data} }`)
         .join(' ');
     // eslint-disable-next-line max-len
-    const command = `tmsh -a modify ltm data-group internal ${path} records replace-all-with { ${tmshRecords} }`;
+    let command = `tmsh -a modify ltm data-group internal ${path} records replace-all-with { ${tmshRecords} }`;
+    if (tmshRecords === '') {
+        command = `tmsh -a delete ltm data-group internal ${path}`;
+    }
     return executeCommand(command);
 }
 
