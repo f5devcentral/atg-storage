@@ -169,7 +169,9 @@ class StorageDataGroup {
             .then(() => readDataGroup(this.path))
             .then(data => outputToObject(data))
             .then((data) => {
-                this.cache = data;
+                if (this.cache) {
+                    this.cache = data;
+                }
                 return data;
             });
     }
