@@ -78,7 +78,10 @@ function updateDataGroup(path, records) {
         .map(record => `${record.name} { data ${record.data} }`)
         .join(' ');
     // eslint-disable-next-line max-len
-    const command = `tmsh -a modify ltm data-group internal ${path} records replace-all-with { ${tmshRecords} }`;
+    let command = `tmsh -a modify ltm data-group internal ${path} records replace-all-with { ${tmshRecords} }`;
+    if (tmshRecords === '') {
+        command = `tmsh -a delete ltm data-group internal ${path}`;
+    }
     return executeCommand(command);
 }
 
@@ -169,7 +172,9 @@ class StorageDataGroup {
             .then(() => readDataGroup(this.path))
             .then(data => outputToObject(data))
             .then((data) => {
-                this.cache = data;
+                if (this.cache) {
+                    this.cache = data;
+                }
                 return data;
             });
     }
@@ -218,6 +223,9 @@ class StorageDataGroup {
                         return acc;
                     }, {});
                     return Promise.resolve();
+                }
+                if (records.length === 0) {
+                    this._ready = false;
                 }
                 return updateDataGroup(this.path, records);
             });
@@ -288,6 +296,12 @@ class StorageDataGroup {
                 if (this.cache) {
                     return Promise.resolve()
                         .then(() => this._getRecords())
+                        .then((records) => {
+                            if (records.length === 0) {
+                                this._ready = false;
+                            }
+                            return Promise.resolve(records);
+                        })
                         .then(records => updateDataGroup(this.path, records))
                         .then(() => {
                             this.cache = {};

@@ -190,4 +190,49 @@ describe('StorageDataGroup', () => {
             return assert.isRejected(storage.getItem('test'), errorString);
         });
     });
+
+    describe('.deleteItem()', () => {
+        it('should not use an empty tmsh modify', () => {
+            const storage = createStorage();
+
+            // disable caching to so we get modify calls without persisting
+            storage.cache = null;
+
+
+            let deleteOrModifyCalled = false;
+
+            tmshCommands['modify ltm data-group'] = (callback, command) => {
+                deleteOrModifyCalled = true;
+                if (command.match(/replace-all-with {\s*}/)) {
+                    assert(false, 'empty replace-all-with not supported by tmsh');
+                }
+
+                callback();
+            };
+            tmshCommands['delete ltm data-group'] = (callback) => {
+                deleteOrModifyCalled = true;
+                callback();
+            };
+            tmshCommands['list ltm data-group'] = (callback) => {
+                const data = [
+                    'ltm data-group internal /storage/data-store {',
+                    '    records {',
+                    '        hello0 {',
+                    '            data eNpTKs8vyklRAgAJ4AJt',
+                    '        }',
+                    '    }',
+                    '    type string',
+                    '}'
+                ].join('\n');
+                callback(null, data);
+            };
+
+            return Promise.resolve()
+                .then(() => storage.deleteItem('hello'))
+                .then(() => assert(
+                    deleteOrModifyCalled,
+                    'expected either modify or delete to be called'
+                ));
+        });
+    });
 });
