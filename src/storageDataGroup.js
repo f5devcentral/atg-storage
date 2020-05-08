@@ -224,6 +224,9 @@ class StorageDataGroup {
                     }, {});
                     return Promise.resolve();
                 }
+                if (records.length === 0) {
+                    this._ready = false;
+                }
                 return updateDataGroup(this.path, records);
             });
     }
@@ -293,6 +296,12 @@ class StorageDataGroup {
                 if (this.cache) {
                     return Promise.resolve()
                         .then(() => this._getRecords())
+                        .then((records) => {
+                            if (records.length === 0) {
+                                this._ready = false;
+                            }
+                            return Promise.resolve(records);
+                        })
                         .then(records => updateDataGroup(this.path, records))
                         .then(() => {
                             this.cache = {};
