@@ -1,5 +1,5 @@
 {
-  "name": "atg-storage",
+  "name": "@f5devcentral/atg-storage",
   "version": "0.1.0",
   "author": "F5 Networks",
   "license": "Apache-2.0",
