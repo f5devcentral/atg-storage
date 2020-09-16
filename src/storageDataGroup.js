@@ -128,15 +128,15 @@ function recordsToKeys(records) {
 class StorageDataGroup {
     constructor(path, options) {
         options = options || {};
-        const opts = Object.assign(options, {
-            useInMemoryCache: options.useInMemoryCache || true
-        });
+        if (typeof options.useInMemoryCache === 'undefined') {
+            options.useInMemoryCache = true;
+        }
 
         this.length = 0;
         this.path = path;
         this._ready = false;
 
-        this.cache = opts.useInMemoryCache ? {} : null;
+        this.cache = options.useInMemoryCache ? {} : null;
         this._dirty = false;
     }
 
