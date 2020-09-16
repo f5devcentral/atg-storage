@@ -96,6 +96,7 @@ function outputToObject(output) {
         .replace(/( {8}})(\s*")/gm, '$1,$2')
         .replace(/(\s*)data (.*?)(\s*)}/gm, '$1"data": "$2"$3}')
         .replace(/^( {4}})/m, '$1,')
+        .replace(/partition (.*)/, '"partition": "$1",')
         .replace('type string', '"type": "string"');
     return JSON.parse(jsonString);
 }
