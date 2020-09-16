@@ -53,6 +53,7 @@ describe('StorageDataGroup', () => {
                     '            data eNpTKs8vyklRAgAJ4AJt',
                     '        }',
                     '    }',
+                    '    partition appsvcs',
                     '    type string',
                     '}'
                 ].join('\n');
