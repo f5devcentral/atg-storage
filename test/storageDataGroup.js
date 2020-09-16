@@ -18,14 +18,32 @@ describe('StorageDataGroup', () => {
     function createStorage() {
         return new StorageDataGroup('/storage/data-store');
     }
+    function createStorageNoCache() {
+        return new StorageDataGroup('/storage/data-store', { useInMemoryCache: false });
+    }
 
     let tmshCommands = {};
+    let defaultCommands = {};
     let overrideCommands = null;
 
     beforeEach(() => {
         let isFolderCreated = false;
         let isDataGroupCreated = false;
-        const defaultCommands = {
+        let data = [
+            'ltm data-group internal /storage/data-store {',
+            '    records {',
+            '        hello0 {',
+            '            data eNpTKs8vyklRAgAJ4AJt',
+            '        }',
+            '        world0 {',
+            '            data eNpTKs8vyklRAgAJ4AJt',
+            '        }',
+            '    }',
+            '    partition appsvcs',
+            '    type string',
+            '}'
+        ].join('\n');
+        defaultCommands = {
             'create sys folder': (callback) => {
                 if (isFolderCreated) {
                     isFolderCreated = false;
@@ -43,21 +61,43 @@ describe('StorageDataGroup', () => {
                 callback();
             },
             'list ltm data-group': (callback) => {
-                const data = [
+                if (!isDataGroupCreated) {
+                    throw new Error('data group was not created before list command');
+                }
+                callback(null, data);
+            },
+            'delete ltm data-group': (callback) => {
+                if (!isDataGroupCreated) {
+                    throw new Error('data group was not created before delete command');
+                }
+                isDataGroupCreated = false;
+                callback();
+            },
+            'modify ltm data-group': (callback, command) => {
+                if (command.match(/replace-all-with {\s*}/)) {
+                    assert(false, 'empty replace-all-with not supported by tmsh');
+                }
+
+                let newData = command.split(' replace-all-with ')[1];
+                assert(newData, `got bad modify command ${command}`);
+                newData = newData
+                    .replace(/(^{ | }$)/gm, '')
+                    .replace(/(\w* { )/gm, '        $1\n             ')
+                    .replace(/ }/gm, '\n        }\n');
+
+                data = [].concat([
                     'ltm data-group internal /storage/data-store {',
-                    '    records {',
-                    '        hello0 {',
-                    '            data eNpTKs8vyklRAgAJ4AJt',
-                    '        }',
-                    '        world0 {',
-                    '            data eNpTKs8vyklRAgAJ4AJt',
-                    '        }',
+                    '    records {'
+                ],
+                [newData],
+                [
                     '    }',
                     '    partition appsvcs',
                     '    type string',
                     '}'
-                ].join('\n');
-                callback(null, data);
+                ]).join('\n');
+
+                callback();
             }
         };
 
@@ -86,7 +126,8 @@ describe('StorageDataGroup', () => {
         sinon.restore();
     });
 
-    generateCommonTests(createStorage);
+    generateCommonTests(createStorage, 'common, with cache');
+    generateCommonTests(createStorageNoCache, 'common, no cache');
 
     describe('Init', () => {
         it('should error if init fails', () => {
@@ -115,6 +156,13 @@ describe('StorageDataGroup', () => {
                     storage.setItem('hello', 'world'),
                     dataGroupError
                 ));
+        });
+        it('should allow control over caching', () => {
+            const storage = createStorage();
+            assert.deepStrictEqual(storage.cache, {});
+
+            const noCache = createStorageNoCache();
+            assert.strictEqual(noCache.cache, null);
         });
     });
 
@@ -194,42 +242,21 @@ describe('StorageDataGroup', () => {
 
     describe('.deleteItem()', () => {
         it('should not use an empty tmsh modify', () => {
-            const storage = createStorage();
-
-            // disable caching to so we get modify calls without persisting
-            storage.cache = null;
-
-
+            const storage = createStorageNoCache();
             let deleteOrModifyCalled = false;
 
             tmshCommands['modify ltm data-group'] = (callback, command) => {
                 deleteOrModifyCalled = true;
-                if (command.match(/replace-all-with {\s*}/)) {
-                    assert(false, 'empty replace-all-with not supported by tmsh');
-                }
-
-                callback();
+                defaultCommands['modify ltm data-group'](callback, command);
             };
-            tmshCommands['delete ltm data-group'] = (callback) => {
+            tmshCommands['delete ltm data-group'] = (callback, command) => {
                 deleteOrModifyCalled = true;
-                callback();
-            };
-            tmshCommands['list ltm data-group'] = (callback) => {
-                const data = [
-                    'ltm data-group internal /storage/data-store {',
-                    '    records {',
-                    '        hello0 {',
-                    '            data eNpTKs8vyklRAgAJ4AJt',
-                    '        }',
-                    '    }',
-                    '    type string',
-                    '}'
-                ].join('\n');
-                callback(null, data);
+                defaultCommands['delete ltm data-group'](callback, command);
             };
 
             return Promise.resolve()
                 .then(() => storage.deleteItem('hello'))
+                .then(() => storage.deleteItem('world'))
                 .then(() => assert(
                     deleteOrModifyCalled,
                     'expected either modify or delete to be called'

@@ -6,8 +6,9 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-module.exports = function generateCommonTests(createStorage) {
-    describe('.hasItem() (common)', () => {
+module.exports = function generateCommonTests(createStorage, label) {
+    label = label || 'common';
+    describe(`.hasItem() (${label})`, () => {
         it('should reject on missing keyName', () => {
             const storage = createStorage();
             return assert.isRejected(storage.hasItem(), 'keyName');
@@ -22,7 +23,7 @@ module.exports = function generateCommonTests(createStorage) {
         });
     });
 
-    describe('.keys() (common)', () => {
+    describe(`.keys() (${label})`, () => {
         it('should return a list of keys', () => {
             const storage = createStorage();
             return Promise.resolve()
@@ -33,7 +34,7 @@ module.exports = function generateCommonTests(createStorage) {
         });
     });
 
-    describe('.setItem() (common)', () => {
+    describe(`.setItem() (${label})`, () => {
         it('should reject on missing keyName', () => {
             const storage = createStorage();
             return assert.isRejected(storage.setItem(), 'keyName');
@@ -50,7 +51,7 @@ module.exports = function generateCommonTests(createStorage) {
         });
     });
 
-    describe('.getItem() (common)', () => {
+    describe(`.getItem() (${label})`, () => {
         it('should reject on missing keyName', () => {
             const storage = createStorage();
             return assert.isRejected(storage.getItem(), 'keyName');
@@ -65,7 +66,7 @@ module.exports = function generateCommonTests(createStorage) {
         });
     });
 
-    describe('.deleteItem() (common)', () => {
+    describe(`.deleteItem() (${label})`, () => {
         it('should reject on missing keyName', () => {
             const storage = createStorage();
             return assert.isRejected(storage.deleteItem(), 'keyName');
