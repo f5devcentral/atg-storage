@@ -24,6 +24,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
+    - run: if [ $(echo 6.17.1 | cut -d . -f 1) -eq 6 ]; then npm install else npm ci fi
     - run: npm run lint
     - run: npm run test
