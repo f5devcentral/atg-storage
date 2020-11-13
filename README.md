@@ -19,8 +19,7 @@ npm install --save \@f5devcentral/atg-storage@git+https://github.com/f5devcentra
 
 Copyright 2020 F5 Networks Inc.
 
-
-### F5 Networks Contributor License Agreement
+## F5 Networks Contributor License Agreement
 Before you start contributing to any project sponsored by F5 Networks, Inc. (F5) on GitHub, you will need to sign a Contributor License Agreement (CLA).
 
 If you are signing as an individual, we recommend that you talk to your employer (if applicable) before signing the CLA since some employment agreements may have restrictions on your contributions to other projects. Otherwise by submitting a CLA you represent that you are legally entitled to grant the licenses recited therein.
