@@ -24,6 +24,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: if [ $( npm --version | cut -d . -f 1) -lt 6 ]; then npm install; else npm ci; fi
+    - run: if [ $( npm --version | cut -d . -f 1) -lt 6 ]; then npm install && npm install eslint@5; else npm ci; fi
     - run: npm run lint
     - run: npm run test
