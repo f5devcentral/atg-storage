@@ -120,7 +120,8 @@ describe('StorageDataGroup', () => {
             '/tmp': {}
         });
 
-        sinon.stub(childProcess, 'exec').callsFake((command, callback) => {
+        sinon.stub(childProcess, 'exec').callsFake((command, options, callback) => {
+            assert.equal(options.maxBufferSize, Infinity);
             let foundCmd = false;
             let commands = overrideCommands;
             if (!commands) {

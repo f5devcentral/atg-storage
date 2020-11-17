@@ -57,8 +57,11 @@ function recordsToString(records, baseKey, offset) {
 
 
 function executeCommand(command) {
+    const options = {
+        maxBufferSize: Infinity
+    };
     return new Promise((resolve, reject) => {
-        childProcess.exec(command, (error, stdout, stderr) => {
+        childProcess.exec(command, options, (error, stdout, stderr) => {
             if (error) reject(error);
             else if (stderr) reject(new Error(stderr));
             else resolve(stdout);
