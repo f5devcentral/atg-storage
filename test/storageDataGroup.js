@@ -3,6 +3,7 @@
 const childProcess = require('child_process');
 const fs = require('fs');
 
+const mockfs = require('mock-fs');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
@@ -115,6 +116,10 @@ describe('StorageDataGroup', () => {
             }
         };
 
+        mockfs({
+            '/tmp': {}
+        });
+
         sinon.stub(childProcess, 'exec').callsFake((command, callback) => {
             let foundCmd = false;
             let commands = overrideCommands;
@@ -138,6 +143,7 @@ describe('StorageDataGroup', () => {
         tmshCommands = {};
         overrideCommands = null;
         sinon.restore();
+        mockfs.restore();
     });
 
     generateCommonTests(createStorage, 'common, with cache');
