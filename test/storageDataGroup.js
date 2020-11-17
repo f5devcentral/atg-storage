@@ -1,7 +1,9 @@
 'use strict';
 
 const childProcess = require('child_process');
+const fs = require('fs');
 
+const mockfs = require('mock-fs');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
@@ -71,6 +73,7 @@ describe('StorageDataGroup', () => {
                     throw new Error('data group was not created before delete command');
                 }
                 isDataGroupCreated = false;
+                data = '';
                 callback();
             },
             'modify ltm data-group': (callback, command) => {
@@ -98,8 +101,24 @@ describe('StorageDataGroup', () => {
                 ]).join('\n');
 
                 callback();
+            },
+            'load sys config merge file': (callback, command) => {
+                if (isDataGroupCreated) {
+                    throw new Error('data group already exists');
+                }
+                const filePath = command.split('merge file ')[1];
+                assert(filePath, `got bad load sys config merge file command ${command}`);
+
+                data = fs.readFileSync(filePath, { encoding: 'utf8' });
+
+                isDataGroupCreated = true;
+                callback();
             }
         };
+
+        mockfs({
+            '/tmp': {}
+        });
 
         sinon.stub(childProcess, 'exec').callsFake((command, options, callback) => {
             assert.equal(options.maxBufferSize, Infinity);
@@ -125,6 +144,7 @@ describe('StorageDataGroup', () => {
         tmshCommands = {};
         overrideCommands = null;
         sinon.restore();
+        mockfs.restore();
     });
 
     generateCommonTests(createStorage, 'common, with cache');

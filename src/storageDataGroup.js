@@ -2,6 +2,7 @@
 
 const http = require('http');
 const zlib = require('zlib');
+const fs = require('fs');
 
 const childProcess = require('child_process');
 
@@ -76,16 +77,49 @@ function addDataGroup(path) {
     return executeCommand(`tmsh -a create ltm data-group internal ${path} type string`);
 }
 
+function deleteDataGroup(path) {
+    return executeCommand(`tmsh -a delete ltm data-group internal ${path}`);
+}
+
 function updateDataGroup(path, records) {
     const tmshRecords = records
         .map(record => `${record.name} { data ${record.data} }`)
-        .join(' ');
-    // eslint-disable-next-line max-len
-    let command = `tmsh -a modify ltm data-group internal ${path} records replace-all-with { ${tmshRecords} }`;
+        .join('\n        ')
+        .replace(/{ /g, '{\n            ')
+        .replace(/ }/g, '\n        }');
+
     if (tmshRecords === '') {
-        command = `tmsh -a delete ltm data-group internal ${path}`;
+        return deleteDataGroup(path);
     }
-    return executeCommand(command);
+    const configFileName = '/tmp/__atg-storage_temp.conf';
+    const configData = [
+        `ltm data-group internal ${path} {`,
+        '    records {',
+        `        ${tmshRecords}`,
+        '    }',
+        '    type string',
+        '}'
+    ].join('\n');
+
+    return Promise.resolve()
+        .then(() => new Promise((resolve, reject) => {
+            fs.writeFile(configFileName, configData, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve();
+            });
+        }))
+        .then(() => deleteDataGroup(path))
+        .then(() => executeCommand(`tmsh -a load sys config merge file ${configFileName}`))
+        .then(() => new Promise((resolve, reject) => {
+            fs.unlink(configFileName, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve();
+            });
+        }));
 }
 
 function readDataGroup(path) {
