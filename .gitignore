@@ -4,3 +4,4 @@ node_modules
 # ignore coverage output
 coverage
 .nyc_output
+.vscode

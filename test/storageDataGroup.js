@@ -62,9 +62,15 @@ describe('StorageDataGroup', () => {
                 isDataGroupCreated = true;
                 callback();
             },
+            'list sys folder': (callback) => {
+                if (!isFolderCreated) {
+                    callback(null, null, 'was not found');
+                }
+                callback();
+            },
             'list ltm data-group': (callback) => {
                 if (!isDataGroupCreated) {
-                    throw new Error('data group was not created before list command');
+                    callback(null, null, 'was not found');
                 }
                 callback(null, data);
             },
@@ -178,12 +184,50 @@ describe('StorageDataGroup', () => {
                     dataGroupError
                 ));
         });
+
         it('should allow control over caching', () => {
             const storage = createStorage();
             assert.deepStrictEqual(storage.cache, {});
 
             const noCache = createStorageNoCache();
             assert.strictEqual(noCache.cache, null);
+        });
+
+        it('should not create folder if it already exists', () => {
+            const storage = createStorage();
+
+            tmshCommands['create sys folder'] = () => {
+                throw new Error(new Error('folder already created'));
+            };
+            tmshCommands['list sys folder'] = (callback) => {
+                callback();
+            };
+
+            return Promise.resolve()
+                .then(() => assert.isFulfilled(
+                    storage.setItem('hello', 'world')
+                ));
+        });
+
+        it('should not create data group if it already exists', () => {
+            const storage = createStorage();
+
+            const data = [
+                'ltm data-group internal /storage/data-store {',
+                '}'
+            ].join('\n');
+
+            tmshCommands['create ltm data-group'] = () => {
+                throw new Error(new Error('data group already created'));
+            };
+            tmshCommands['list ltm data-group'] = (callback) => {
+                callback(null, data);
+            };
+
+            return Promise.resolve()
+                .then(() => assert.isFulfilled(
+                    storage.setItem('hello', 'world')
+                ));
         });
     });
 
