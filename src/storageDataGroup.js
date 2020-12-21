@@ -215,18 +215,30 @@ class StorageDataGroup {
             });
     }
 
-
     _lazyInit() {
         if (this._ready) {
             return Promise.resolve();
         }
 
-        return Promise.resolve()
+        if (this._initRunning) {
+            return this._initPromise;
+        }
+
+        this._initRunning = true;
+
+        this._initPromise = Promise.resolve()
             .then(() => this.ensureFolder())
             .then(() => this.ensureDataGroup())
             .then(() => {
+                this._initRunning = false;
                 this._ready = true;
+            })
+            .catch((err) => {
+                this._initRunning = false;
+                throw err;
             });
+
+        return this._initPromise;
     }
 
     _getData() {

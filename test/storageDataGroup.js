@@ -229,6 +229,17 @@ describe('StorageDataGroup', () => {
                     storage.setItem('hello', 'world')
                 ));
         });
+
+        it('should block from running init if it is already running', () => {
+            const storage = createStorage();
+
+            return assert.isFulfilled(
+                Promise.all([
+                    storage.setItem('hello', 'world'),
+                    storage.setItem('foo', 'bar')
+                ])
+            );
+        });
     });
 
     describe('.setItem()', () => {

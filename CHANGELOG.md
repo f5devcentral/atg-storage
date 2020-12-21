@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2020-12-21
+### Fixed
+- AUTOTOOL-2138: Data store initialization can fail from race condition
+
 ## [1.0.1] - 2020-12-18
 ### Changed
 - AUTOTOOL-638: ([GitHub Issue 122](https://github.com/F5Networks/f5-appsvcs-extension/issues/122)) Data store interactions cause errors in mcpd log

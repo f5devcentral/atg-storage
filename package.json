@@ -1,6 +1,6 @@
 {
   "name": "@f5devcentral/atg-storage",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "F5 Networks",
   "license": "Apache-2.0",
   "main": "index.js",
