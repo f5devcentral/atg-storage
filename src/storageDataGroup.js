@@ -15,12 +15,6 @@ function fromBase64(input) {
     return Buffer.from(input, 'base64');
 }
 
-function filterDuplicateResourceError(error) {
-    if (error.message.indexOf('already exists') < 0) {
-        throw error;
-    }
-}
-
 function stringToRecords(baseKey, string, offset) {
     const compressedString = zlib.deflateSync(string, ZLIB_OPTIONS);
 
@@ -69,6 +63,10 @@ function executeCommand(command) {
     });
 }
 
+function list(path) {
+    return executeCommand(`tmsh -a list ${path}`);
+}
+
 function addFolder(path) {
     return executeCommand(`tmsh -a create sys folder ${path}`);
 }
@@ -79,6 +77,25 @@ function addDataGroup(path) {
 
 function deleteDataGroup(path) {
     return executeCommand(`tmsh -a delete ltm data-group internal ${path}`);
+}
+
+function itemExists(path) {
+    return list(path)
+        .then(() => true)
+        .catch((err) => {
+            if (err.message.indexOf('was not found') >= 0) {
+                return false;
+            }
+            throw err;
+        });
+}
+
+function folderExists(path) {
+    return itemExists(`sys folder ${path}`);
+}
+
+function dataGroupExists(path) {
+    return itemExists(`ltm data-group internal ${path}`);
 }
 
 function updateDataGroup(path, records) {
@@ -179,25 +196,49 @@ class StorageDataGroup {
 
     ensureFolder() {
         const path = this.path.split('/').slice(0, -1).join('/');
-        return addFolder(path).catch(filterDuplicateResourceError);
+        return folderExists(path)
+            .then((exists) => {
+                if (exists) {
+                    return Promise.resolve();
+                }
+                return addFolder(path);
+            });
     }
 
     ensureDataGroup() {
-        return addDataGroup(this.path).catch(filterDuplicateResourceError);
+        return dataGroupExists(this.path)
+            .then((exists) => {
+                if (exists) {
+                    return Promise.resolve();
+                }
+                return addDataGroup(this.path);
+            });
     }
-
 
     _lazyInit() {
         if (this._ready) {
             return Promise.resolve();
         }
 
-        return Promise.resolve()
+        if (this._initRunning) {
+            return this._initPromise;
+        }
+
+        this._initRunning = true;
+
+        this._initPromise = Promise.resolve()
             .then(() => this.ensureFolder())
             .then(() => this.ensureDataGroup())
             .then(() => {
+                this._initRunning = false;
                 this._ready = true;
+            })
+            .catch((err) => {
+                this._initRunning = false;
+                throw err;
             });
+
+        return this._initPromise;
     }
 
     _getData() {
