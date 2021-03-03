@@ -15,6 +15,14 @@ It is recommended that you specify a commit or tag to avoid pulling in unwanted 
 npm install --save \@f5devcentral/atg-storage@git+https://github.com/f5devcentral/atg-storage.git#v0.1.0
 ```
 
+## Extensions
+
+The `extentions` directory contains additional NPM modules that can be used with atg-storage.
+These are built as separate modules to avoid adding too many dependencies to atg-storage itself.
+They can be installed using `npm` as usual.
+
+* atg-storage-postgres - adds a PostgreSQL backend
+
 ## Copyright
 
 Copyright 2021 F5 Networks Inc.
