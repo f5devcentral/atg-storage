@@ -17,7 +17,7 @@ npm install --save \@f5devcentral/atg-storage@git+https://github.com/f5devcentra
 
 ## Copyright
 
-Copyright 2020 F5 Networks Inc.
+Copyright 2021 F5 Networks Inc.
 
 ## F5 Networks Contributor License Agreement
 Before you start contributing to any project sponsored by F5 Networks, Inc. (F5) on GitHub, you will need to sign a Contributor License Agreement (CLA).
