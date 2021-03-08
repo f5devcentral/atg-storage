@@ -1,27 +1,25 @@
-# atg-storage
+# atg-storage-postgres
 
 ## Overview
-This is a Node library to provide an abstraction layer over multiple storage backends for BIG-IP iControl LX Extensions. 
+[atg-storage](https://github.com/f5devcentral/atg-storage/) extension to add support for PostgreSQL as a backend.
 
 ## Installation
 You can install the package with NPM:
 ```bash
-npm install --save \@f5devcentral/atg-storage
+npm install --save \@f5devcentral/atg-storage-postgres
 ```
 
-If you need changes that are not yet available on NPM, you can install the package from this repository.
-It is recommended that you specify a commit or tag to avoid pulling in unwanted commits from the master branch:
-```bash
-npm install --save \@f5devcentral/atg-storage@git+https://github.com/f5devcentral/atg-storage.git#v0.1.0
+## Usage
+
+```javascript
+const { StoragePostgres } = require('@f5devcentral/atg-storage-postgres');
+const config = {
+...
+};
+const storage = new StoragePostgres(config);
 ```
 
-## Extensions
-
-The `extentions` directory contains additional NPM modules that can be used with atg-storage.
-These are built as separate modules to avoid adding too many dependencies to atg-storage itself.
-They can be installed using `npm` as usual.
-
-* atg-storage-postgres - adds a PostgreSQL backend
+`config` gets passed along to the [pg.Client constructor](https://node-postgres.com/api/client), and can be used to configure the database connection.
 
 ## Copyright
 
