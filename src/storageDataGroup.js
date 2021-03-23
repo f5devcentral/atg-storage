@@ -52,7 +52,7 @@ function recordsToString(records, baseKey, offset) {
 
 function executeCommand(command) {
     const options = {
-        maxBufferSize: Infinity
+        maxBuffer: Infinity
     };
     return new Promise((resolve, reject) => {
         childProcess.exec(command, options, (error, stdout, stderr) => {

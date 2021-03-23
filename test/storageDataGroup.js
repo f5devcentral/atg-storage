@@ -127,7 +127,7 @@ describe('StorageDataGroup', () => {
         });
 
         sinon.stub(childProcess, 'exec').callsFake((command, options, callback) => {
-            assert.equal(options.maxBufferSize, Infinity);
+            assert.equal(options.maxBuffer, Infinity);
             let foundCmd = false;
             let commands = overrideCommands;
             if (!commands) {
