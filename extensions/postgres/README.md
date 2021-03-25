@@ -13,10 +13,11 @@ npm install --save \@f5devcentral/atg-storage-postgres
 
 ```javascript
 const { StoragePostgres } = require('@f5devcentral/atg-storage-postgres');
+const tablename = 'templates';
 const config = {
 ...
 };
-const storage = new StoragePostgres(config);
+const storage = new StoragePostgres(templates, config);
 ```
 
 `config` gets passed along to the [pg.Client constructor](https://node-postgres.com/api/client), and can be used to configure the database connection.
