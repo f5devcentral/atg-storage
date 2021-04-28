@@ -3,6 +3,9 @@
 const http = require('http');
 const zlib = require('zlib');
 const fs = require('fs');
+const pathLib = require('path');
+const os = require('os');
+const crypto = require('crypto');
 
 const childProcess = require('child_process');
 
@@ -108,7 +111,8 @@ function updateDataGroup(path, records) {
     if (tmshRecords === '') {
         return deleteDataGroup(path);
     }
-    const configFileName = '/tmp/__atg-storage_temp.conf';
+    const randBytes = crypto.randomBytes(16).toString('hex');
+    const configFileName = pathLib.join(os.tmpdir(), `atg-storage.${randBytes}.conf`);
     const configData = [
         `ltm data-group internal ${path} {`,
         '    records {',
