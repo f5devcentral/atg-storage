@@ -112,7 +112,7 @@ function updateDataGroup(path, records) {
         return deleteDataGroup(path);
     }
     const randBytes = crypto.randomBytes(16).toString('hex');
-    const configFileName = pathLib.join(os.tmpdir(), `atg-storage.${randBytes}.conf`);
+    const configFileName = pathLib.join(os.tmpdir(), `tmp${randBytes}.conf`);
     const configData = [
         `ltm data-group internal ${path} {`,
         '    records {',
@@ -124,7 +124,7 @@ function updateDataGroup(path, records) {
 
     return Promise.resolve()
         .then(() => new Promise((resolve, reject) => {
-            fs.writeFile(configFileName, configData, (err) => {
+            fs.writeFile(configFileName, configData, { mode: 0o600, flag: 'wx' }, (err) => {
                 if (err) {
                     return reject(err);
                 }
