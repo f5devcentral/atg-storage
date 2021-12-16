@@ -17,7 +17,7 @@ const tablename = 'templates';
 const config = {
 ...
 };
-const storage = new StoragePostgres(templates, config);
+const storage = new StoragePostgres(tablename, config);
 ```
 
 `config` gets passed along to the [pg.Client constructor](https://node-postgres.com/api/client), and can be used to configure the database connection.
