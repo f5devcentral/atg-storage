@@ -15,7 +15,6 @@ const generateCommonTests = require('./generateCommonTests');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-
 describe('StorageDataGroup', () => {
     function createStorage() {
         return new StorageDataGroup('/storage/data-store');
@@ -94,17 +93,19 @@ describe('StorageDataGroup', () => {
                     .replace(/(\w* { )/gm, '        $1\n             ')
                     .replace(/ }/gm, '\n        }\n');
 
-                data = [].concat([
-                    'ltm data-group internal /storage/data-store {',
-                    '    records {'
-                ],
-                [newData],
-                [
-                    '    }',
-                    '    partition appsvcs',
-                    '    type string',
-                    '}'
-                ]).join('\n');
+                data = [].concat(
+                    [
+                        'ltm data-group internal /storage/data-store {',
+                        '    records {'
+                    ],
+                    [newData],
+                    [
+                        '    }',
+                        '    partition appsvcs',
+                        '    type string',
+                        '}'
+                    ]
+                ).join('\n');
 
                 callback();
             },

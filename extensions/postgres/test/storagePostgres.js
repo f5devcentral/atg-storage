@@ -8,7 +8,6 @@ const StoragePostgres = require('../src/storagePostgres');
 
 const generateCommonTests = require('../../../test/generateCommonTests');
 
-
 describe('StoragePostgres', () => {
     function createStorage() {
         return new StoragePostgres('test');

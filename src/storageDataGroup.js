@@ -52,7 +52,6 @@ function recordsToString(records, baseKey, offset) {
     return finalString;
 }
 
-
 function executeCommand(command) {
     const options = {
         maxBuffer: Infinity

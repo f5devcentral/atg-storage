@@ -2,7 +2,6 @@
 
 const { Pool } = require('pg');
 
-
 class StoragePostgres {
     constructor(tablename, options) {
         options = options || {};
