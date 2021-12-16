@@ -16,23 +16,29 @@
   "eslintConfig": {
     "extends": "@f5devcentral/eslint-config-f5-atg",
     "rules": {
-      "no-control-regex": "off"
+      "arrow-parens": [
+        "error",
+        "as-needed",
+        {
+          "requireForBlockBody": true
+        }
+      ]
     }
   },
   "dependencies": {},
   "devDependencies": {
-    "@f5devcentral/eslint-config-f5-atg": "^0.1.1",
+    "@f5devcentral/eslint-config-f5-atg": "^0.1.6",
     "@stryker-mutator/core": "^2.5.0",
     "@stryker-mutator/javascript-mutator": "^2.5.0",
     "@stryker-mutator/mocha-framework": "^2.5.0",
     "@stryker-mutator/mocha-runner": "^2.5.0",
-    "chai": "^4.2.0",
+    "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^6.8.0",
+    "eslint": "^8.4.1",
     "mocha": "^6.2.3",
-    "mock-fs": "^4.13.0",
+    "mock-fs": "^4.14.0",
     "nyc": "^15.1.0",
-    "sinon": "^7.5.0",
-    "stryker-cli": "^1.0.0"
+    "sinon": "^12.0.1",
+    "stryker-cli": "^1.0.2"
   }
 }
