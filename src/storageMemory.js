@@ -39,6 +39,10 @@ class StorageMemory {
         return Promise.resolve();
     }
 
+    clearCache() {
+        return Promise.resolve();
+    }
+
     persist() {
         return Promise.resolve();
     }

@@ -340,4 +340,17 @@ describe('StorageDataGroup', () => {
                 ));
         });
     });
+
+    describe('.clearCache()', () => {
+        it('should allow for clearing the cache', () => {
+            const storage = createStorage();
+            storage.cache = {
+                foo: 'bar'
+            };
+            return storage.clearCache()
+                .then(() => {
+                    assert.deepStrictEqual(storage.cache, {});
+                });
+        });
+    });
 });
