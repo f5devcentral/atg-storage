@@ -82,4 +82,11 @@ module.exports = function generateCommonTests(createStorage, label) {
                 });
         });
     });
+
+    describe(`.clearCache() (${label})`, () => {
+        it('should support clearCache', () => {
+            const storage = createStorage();
+            assert.doesNotThrow(() => storage.clearCache());
+        });
+    });
 };

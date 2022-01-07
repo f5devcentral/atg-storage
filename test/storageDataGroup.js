@@ -194,17 +194,6 @@ describe('StorageDataGroup', () => {
             assert.strictEqual(noCache.cache, null);
         });
 
-        it('should allow for clearing the cache', () => {
-            const storage = createStorage();
-            storage.cache = {
-                foo: 'bar'
-            };
-            return storage.clearCache()
-                .then(() => {
-                    assert.deepStrictEqual(storage.cache, {});
-                });
-        });
-
         it('should not create folder if it already exists', () => {
             const storage = createStorage();
 
@@ -349,6 +338,19 @@ describe('StorageDataGroup', () => {
                     deleteOrModifyCalled,
                     'expected either modify or delete to be called'
                 ));
+        });
+    });
+
+    describe('.clearCache()', () => {
+        it('should allow for clearing the cache', () => {
+            const storage = createStorage();
+            storage.cache = {
+                foo: 'bar'
+            };
+            return storage.clearCache()
+                .then(() => {
+                    assert.deepStrictEqual(storage.cache, {});
+                });
         });
     });
 });
