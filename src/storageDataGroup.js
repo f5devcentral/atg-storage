@@ -270,6 +270,13 @@ class StorageDataGroup {
             ));
     }
 
+    clearCache() {
+        return Promise.resolve()
+            .then(() => {
+                this.cache = {};
+            });
+    }
+
     keys() {
         return Promise.resolve()
             .then(() => this._getRecords())
