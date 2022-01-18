@@ -224,6 +224,9 @@ describe('StorageDataGroup', () => {
             tmshCommands['list ltm data-group'] = (callback) => {
                 callback(null, data);
             };
+            tmshCommands['delete ltm data-group'] = (callback) => {
+                callback();
+            };
 
             return Promise.resolve()
                 .then(() => assert.isFulfilled(
@@ -233,13 +236,25 @@ describe('StorageDataGroup', () => {
 
         it('should block from running init if it is already running', () => {
             const storage = createStorage();
+            const data = [
+                'ltm data-group internal /storage/data-store {',
+                '}'
+            ].join('\n');
 
-            return assert.isFulfilled(
-                Promise.all([
-                    storage.setItem('hello', 'world'),
-                    storage.setItem('foo', 'bar')
-                ])
-            );
+            tmshCommands['list ltm data-group'] = (callback) => {
+                callback(null, data);
+            };
+
+            const ensureFolderSpy = sinon.stub(storage, 'ensureFolder').resolves();
+            const ensureDataGroupSpy = sinon.stub(storage, 'ensureDataGroup').resolves();
+            return Promise.all([
+                storage._getData(),
+                storage._getData()
+            ])
+                .then(() => {
+                    assert.ok(ensureFolderSpy.calledOnce);
+                    assert.ok(ensureDataGroupSpy.calledOnce);
+                });
         });
     });
 

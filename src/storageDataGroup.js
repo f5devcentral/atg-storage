@@ -311,7 +311,6 @@ class StorageDataGroup {
                         acc[curr.name] = curr;
                         return acc;
                     }, {});
-                    return Promise.resolve();
                 }
                 if (records.length === 0) {
                     this._ready = false;
@@ -337,7 +336,6 @@ class StorageDataGroup {
                         acc[curr.name] = curr;
                         return acc;
                     }, {});
-                    return Promise.resolve();
                 }
 
                 return updateDataGroup(this.path, records);
