@@ -379,23 +379,6 @@ class StorageDataGroup {
         }
 
         return Promise.resolve()
-            .then(() => {
-                if (this.cache) {
-                    return Promise.resolve()
-                        .then(() => this._getRecords())
-                        .then((records) => {
-                            if (records.length === 0) {
-                                this._ready = false;
-                            }
-                            return Promise.resolve(records);
-                        })
-                        .then(records => updateDataGroup(this.path, records))
-                        .then(() => {
-                            this.cache = {};
-                        });
-                }
-                return Promise.resolve();
-            })
             .then(() => new Promise((resolve, reject) => {
                 const req = http.request(opts, (res) => {
                     const buffer = [];
