@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 - Always save data to data group on write in StorageDataGroup
 
-## [1.2.0]
+## [1.2.0] - 2022-1-7
 ## Added
 - clearCache method
 ## Fixed
 - Fix some security concerns with temporary file usage in StorageDataGroup
 
-## [1.1.0] - 2020-5-6
+## [1.1.0] - 2021-5-6
 ## Added
 - Add StorageJsonFile storage backend to persist on disk using JSON
 ## Fixed
