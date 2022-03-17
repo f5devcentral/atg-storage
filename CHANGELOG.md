@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0] - 2022-1-18
 ## Changed
 - Always save data to data group on write in StorageDataGroup
+- Prevent persist from exiting early, when task is kicked off
 
 ## [1.2.0] - 2022-1-7
 ## Added

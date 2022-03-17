@@ -373,7 +373,7 @@ describe('StorageDataGroup', () => {
         });
     });
 
-    describe.only('.persist()', () => {
+    describe('.persist()', () => {
         beforeEach(() => {
             sinon.stub(promiseUtil, 'delay').resolves(); // This bypasses the 500ms delay
         });
