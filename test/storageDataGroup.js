@@ -391,15 +391,17 @@ describe('StorageDataGroup', () => {
         it('should save the sys config via tmsh', () => {
             const localnock = nock('http://localhost:8100')
                 .post('/mgmt/tm/task/sys/config')
-                .reply(200,
+                .reply(
+                    200,
                     {
                         _taskId: 123456,
                         _taskState: 'STARTED',
                         _taskTimeInStateMs: 0
                     }
                 )
-                .put('/mgmt/tm/task/sys/config/123456', '{\"_taskState\":\"VALIDATING\"}')
-                .reply(202,
+                .put('/mgmt/tm/task/sys/config/123456', '{"_taskState":"VALIDATING"}')
+                .reply(
+                    202,
                     {
                         code: 202,
                         message: 'Task will execute asynchronously',
@@ -407,7 +409,8 @@ describe('StorageDataGroup', () => {
                     }
                 )
                 .get('/mgmt/tm/task/sys/config/123456')
-                .reply(200,
+                .reply(
+                    200,
                     {
                         _taskId: 123456,
                         _taskState: 'VALIDATING',
@@ -415,7 +418,8 @@ describe('StorageDataGroup', () => {
                     }
                 )
                 .get('/mgmt/tm/task/sys/config/123456')
-                .reply(200,
+                .reply(
+                    200,
                     {
                         _taskId: 123456,
                         _taskState: 'COMPLETED',
@@ -435,7 +439,8 @@ describe('StorageDataGroup', () => {
         it('should exit early if the POST does not return a 200', () => {
             const localnock = nock('http://localhost:8100')
                 .post('/mgmt/tm/task/sys/config')
-                .reply(400,
+                .reply(
+                    400,
                     {
                         _taskId: 123456,
                         _taskState: 'FAILED',
@@ -454,15 +459,17 @@ describe('StorageDataGroup', () => {
         it('should exit early if the _taskState is FAILED', () => {
             const localnock = nock('http://localhost:8100')
                 .post('/mgmt/tm/task/sys/config')
-                .reply(200,
+                .reply(
+                    200,
                     {
                         _taskId: 123456,
                         _taskState: 'STARTED',
                         _taskTimeInStateMs: 0
                     }
                 )
-                .put('/mgmt/tm/task/sys/config/123456', '{\"_taskState\":\"VALIDATING\"}')
-                .reply(202,
+                .put('/mgmt/tm/task/sys/config/123456', '{"_taskState":"VALIDATING"}')
+                .reply(
+                    202,
                     {
                         code: 202,
                         message: 'Task will execute asynchronously',
@@ -470,7 +477,8 @@ describe('StorageDataGroup', () => {
                     }
                 )
                 .get('/mgmt/tm/task/sys/config/123456')
-                .reply(400,
+                .reply(
+                    400,
                     {
                         _taskId: 123456,
                         _taskState: 'FAILED',
@@ -478,7 +486,8 @@ describe('StorageDataGroup', () => {
                     }
                 )
                 .get('/mgmt/tm/task/sys/config/123456')
-                .reply(200,
+                .reply(
+                    200,
                     {
                         _taskId: 123456,
                         _taskState: 'VALIDATING',
@@ -490,7 +499,8 @@ describe('StorageDataGroup', () => {
             storage._dirty = true;
             return assert.isRejected(storage.persist(), /Configuration save failed during execution/)
                 .then(() => {
-                    assert.deepStrictEqual(localnock.pendingMocks(),
+                    assert.deepStrictEqual(
+                        localnock.pendingMocks(),
                         [
                             'GET http://localhost:8100/mgmt/tm/task/sys/config/123456'
                         ]
@@ -501,15 +511,17 @@ describe('StorageDataGroup', () => {
         it('should error if we run out of retries', () => {
             const localnock = nock('http://localhost:8100')
                 .post('/mgmt/tm/task/sys/config')
-                .reply(200,
+                .reply(
+                    200,
                     {
                         _taskId: 123456,
                         _taskState: 'STARTED',
                         _taskTimeInStateMs: 0
                     }
                 )
-                .put('/mgmt/tm/task/sys/config/123456', '{\"_taskState\":\"VALIDATING\"}')
-                .reply(202,
+                .put('/mgmt/tm/task/sys/config/123456', '{"_taskState":"VALIDATING"}')
+                .reply(
+                    202,
                     {
                         code: 202,
                         message: 'Task will execute asynchronously',
@@ -518,7 +530,8 @@ describe('StorageDataGroup', () => {
                 )
                 .get('/mgmt/tm/task/sys/config/123456')
                 .times(121)
-                .reply(200,
+                .reply(
+                    200,
                     {
                         _taskId: 123456,
                         _taskState: 'VALIDATING',
