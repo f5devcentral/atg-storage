@@ -1,12 +1,15 @@
 'use strict';
 
+const http = require('http');
 const childProcess = require('child_process');
 const fs = require('fs');
 
+const nock = require('nock');
 const mockfs = require('mock-fs');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
+const promiseUtil = require('@f5devcentral/atg-shared-utilities').promiseUtils;
 
 const StorageDataGroup = require('../src/storageDataGroup');
 
@@ -152,6 +155,7 @@ describe('StorageDataGroup', () => {
         overrideCommands = null;
         sinon.restore();
         mockfs.restore();
+        nock.cleanAll();
     });
 
     generateCommonTests(createStorage, 'common, with cache');
@@ -365,6 +369,168 @@ describe('StorageDataGroup', () => {
             return storage.clearCache()
                 .then(() => {
                     assert.deepStrictEqual(storage.cache, {});
+                });
+        });
+    });
+
+    describe.only('.persist()', () => {
+        beforeEach(() => {
+            sinon.stub(promiseUtil, 'delay').resolves(); // This bypasses the 500ms delay
+        });
+
+        it('should exit early if _dirty is false', () => {
+            const storage = createStorage();
+            storage._dirty = false;
+            const httpSpy = sinon.spy(http, 'request');
+            return storage.persist()
+                .then(() => {
+                    assert.strictEqual(httpSpy.callCount, 0); // Should exit before calling http.request
+                });
+        });
+
+        it('should save the sys config via tmsh', () => {
+            const localnock = nock('http://localhost:8100')
+                .post('/mgmt/tm/task/sys/config')
+                .reply(200,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'STARTED',
+                        _taskTimeInStateMs: 0
+                    }
+                )
+                .put('/mgmt/tm/task/sys/config/123456', '{\"_taskState\":\"VALIDATING\"}')
+                .reply(202,
+                    {
+                        code: 202,
+                        message: 'Task will execute asynchronously',
+                        errorStack: []
+                    }
+                )
+                .get('/mgmt/tm/task/sys/config/123456')
+                .reply(200,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'VALIDATING',
+                        _taskTimeInStateMs: 100000
+                    }
+                )
+                .get('/mgmt/tm/task/sys/config/123456')
+                .reply(200,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'COMPLETED',
+                        _taskTimeInStateMs: 15000
+                    }
+                );
+
+            const storage = createStorage();
+            storage._dirty = true;
+            return storage.persist()
+                .then(() => {
+                    assert.deepStrictEqual(localnock.pendingMocks(), []);
+                    assert.ok(localnock.isDone(), 'nock should have completed');
+                });
+        });
+
+        it('should exit early if the POST does not return a 200', () => {
+            const localnock = nock('http://localhost:8100')
+                .post('/mgmt/tm/task/sys/config')
+                .reply(400,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'FAILED',
+                        _taskTimeInStateMs: 0
+                    }
+                );
+
+            const storage = createStorage();
+            storage._dirty = true;
+            return assert.isRejected(storage.persist(), /failed to submit save sys config task/)
+                .then(() => {
+                    assert.deepStrictEqual(localnock.pendingMocks(), []);
+                });
+        });
+
+        it('should exit early if the _taskState is FAILED', () => {
+            const localnock = nock('http://localhost:8100')
+                .post('/mgmt/tm/task/sys/config')
+                .reply(200,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'STARTED',
+                        _taskTimeInStateMs: 0
+                    }
+                )
+                .put('/mgmt/tm/task/sys/config/123456', '{\"_taskState\":\"VALIDATING\"}')
+                .reply(202,
+                    {
+                        code: 202,
+                        message: 'Task will execute asynchronously',
+                        errorStack: []
+                    }
+                )
+                .get('/mgmt/tm/task/sys/config/123456')
+                .reply(400,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'FAILED',
+                        _taskTimeInStateMs: 10000
+                    }
+                )
+                .get('/mgmt/tm/task/sys/config/123456')
+                .reply(200,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'VALIDATING',
+                        _taskTimeInStateMs: 15000
+                    }
+                );
+
+            const storage = createStorage();
+            storage._dirty = true;
+            return assert.isRejected(storage.persist(), /Configuration save failed during execution/)
+                .then(() => {
+                    assert.deepStrictEqual(localnock.pendingMocks(),
+                        [
+                            'GET http://localhost:8100/mgmt/tm/task/sys/config/123456'
+                        ]
+                    );
+                });
+        });
+
+        it('should error if we run out of retries', () => {
+            const localnock = nock('http://localhost:8100')
+                .post('/mgmt/tm/task/sys/config')
+                .reply(200,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'STARTED',
+                        _taskTimeInStateMs: 0
+                    }
+                )
+                .put('/mgmt/tm/task/sys/config/123456', '{\"_taskState\":\"VALIDATING\"}')
+                .reply(202,
+                    {
+                        code: 202,
+                        message: 'Task will execute asynchronously',
+                        errorStack: []
+                    }
+                )
+                .get('/mgmt/tm/task/sys/config/123456')
+                .times(121)
+                .reply(200,
+                    {
+                        _taskId: 123456,
+                        _taskState: 'VALIDATING',
+                        _taskTimeInStateMs: 15000
+                    }
+                );
+
+            const storage = createStorage();
+            storage._dirty = true;
+            return assert.isRejected(storage.persist(), /Configuration save taking longer than expected/)
+                .then(() => {
+                    assert.deepStrictEqual(localnock.pendingMocks(), []);
                 });
         });
     });
