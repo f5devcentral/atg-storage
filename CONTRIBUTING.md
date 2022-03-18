@@ -30,8 +30,8 @@ If you are signing on behalf of a company, you represent that you are legally en
 * `git push`
 * `git push origin v{newVersion}`
   * Example: `git push origin v1.3.2`
-  * Note: This will push the new tags created by the previous `npm version` command. You can confirm this via the GUI.
-* Via the GUI create a new release branch, using the tag just pushed. Copy the relevant CHANGELOG entry into the release version message.
+  * Note: This will push the new tags created by the previous `npm version` command. You can confirm this via GitHub.
+* Via GitHub create a new GitHub release, using the tag just pushed. Copy the relevant CHANGELOG entry into the release version message.
 * `npm publish --dry-run`
   * Note: dry-run is used to confirm version number and changes
 * `npm publish --access=public`
