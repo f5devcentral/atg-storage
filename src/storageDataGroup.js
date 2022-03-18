@@ -1,6 +1,5 @@
 'use strict';
 
-const http = require('http');
 const zlib = require('zlib');
 const fs = require('fs');
 const pathLib = require('path');
@@ -10,6 +9,7 @@ const crypto = require('crypto');
 const childProcess = require('child_process');
 
 const promiseUtil = require('@f5devcentral/atg-shared-utilities').promiseUtils;
+const request = require('@f5devcentral/atg-shared-utilities').requestUtils;
 
 const ZLIB_OPTIONS = {
     level: zlib.Z_BEST_COMPRESSION,
@@ -185,7 +185,8 @@ function recordsToKeys(records) {
 }
 
 function waitForCompletion(path, remainingRetries) {
-    const checkOptions = {
+    const opts = {
+        protocol: 'http:',
         host: 'localhost',
         port: 8100,
         path,
@@ -198,9 +199,9 @@ function waitForCompletion(path, remainingRetries) {
     };
 
     return Promise.resolve()
-        .then(() => iControlRestRequest(checkOptions))
+        .then(() => request.send(opts))
         .then((response) => {
-            if (response.body._taskState === 'VALIDATING') {
+            if (response._taskState === 'VALIDATING') {
                 if (remainingRetries > 0) {
                     return promiseUtil.delay(500)
                         .then(() => waitForCompletion(path, remainingRetries - 1));
@@ -208,8 +209,8 @@ function waitForCompletion(path, remainingRetries) {
                 throw new Error('Configuration save taking longer than expected');
             }
 
-            if (response.body._taskState === 'FAILED') {
-                throw new Error(`Configuration save failed during execution: ${JSON.stringify(response.body)}`);
+            if (response._taskState === 'FAILED') {
+                throw new Error(`Configuration save failed during execution: ${JSON.stringify(response)}`);
             }
 
             return Promise.resolve();
@@ -233,42 +234,6 @@ function waitForCompletion(path, remainingRetries) {
             }
             throw error;
         });
-}
-
-function iControlRestRequest(opts, payload) {
-    return new Promise((resolve, reject) => {
-        const req = http.request(opts, (res) => {
-            const buffer = [];
-            res.setEncoding('utf8');
-            res.on('data', (data) => {
-                buffer.push(data);
-            });
-            res.on('end', () => {
-                let body = buffer.join('');
-                body = body || '{}';
-                try {
-                    body = JSON.parse(body);
-                } catch (e) {
-                    return reject(new Error(`Invalid response object from ${opts.method} to ${opts.path}`));
-                }
-                return resolve({
-                    status: res.statusCode,
-                    headers: res.headers,
-                    body
-                });
-            });
-        });
-
-        req.on('error', (e) => {
-            reject(new Error(`${opts.host}:${e.message}`));
-        });
-
-        if (payload) {
-            req.end(JSON.stringify(payload));
-        } else {
-            req.end();
-        }
-    });
 }
 
 class StorageDataGroup {
@@ -457,6 +422,7 @@ class StorageDataGroup {
         return Promise.resolve()
             .then(() => {
                 const opts = {
+                    protocol: 'http:',
                     host: 'localhost',
                     port: 8100,
                     path: '/mgmt/tm/task/sys/config',
@@ -470,14 +436,15 @@ class StorageDataGroup {
                     command: 'save'
                 };
 
-                return iControlRestRequest(opts, payload);
+                return request.send(opts, payload);
             })
             .then((res) => {
-                if (res.status !== 200) {
-                    return Promise.reject(new Error(`failed to submit save sys config task:${JSON.stringify(res.body)}`));
+                if (res._taskState !== 'STARTED') {
+                    return Promise.reject(new Error(`failed to submit save sys config task:${JSON.stringify(res)}`));
                 }
-                taskId = res.body._taskId;
+                taskId = res._taskId;
                 const opts = {
+                    protocol: 'http:',
                     host: 'localhost',
                     port: 8100,
                     path: `/mgmt/tm/task/sys/config/${taskId}`,
@@ -489,11 +456,11 @@ class StorageDataGroup {
                 };
                 const payload = { _taskState: 'VALIDATING' };
 
-                return iControlRestRequest(opts, payload);
+                return request.send(opts, payload);
             })
-            .then((response) => {
-                if (response.status !== 202) {
-                    return Promise.reject(new Error(`failed to update save sys config task:${JSON.stringify(response.body)}`));
+            .then((res) => {
+                if (res.message !== 'Task will execute asynchronously') {
+                    return Promise.reject(new Error(`failed to update save sys config task:${JSON.stringify(res)}`));
                 }
 
                 return waitForCompletion(`/mgmt/tm/task/sys/config/${taskId}`, 120);

@@ -436,11 +436,11 @@ describe('StorageDataGroup', () => {
                 });
         });
 
-        it('should exit early if the POST does not return a 200', () => {
+        it('should exit early if the POST does not return a taskState of STARTED', () => {
             const localnock = nock('http://localhost:8100')
                 .post('/mgmt/tm/task/sys/config')
                 .reply(
-                    400,
+                    200, // Note: Even though the state FAILED, the status code remains 200
                     {
                         _taskId: 123456,
                         _taskState: 'FAILED',
@@ -478,7 +478,7 @@ describe('StorageDataGroup', () => {
                 )
                 .get('/mgmt/tm/task/sys/config/123456')
                 .reply(
-                    400,
+                    200, // Note: Even though the state FAILED, the status code remains 200
                     {
                         _taskId: 123456,
                         _taskState: 'FAILED',
