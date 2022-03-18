@@ -459,7 +459,7 @@ class StorageDataGroup {
                 return request.send(opts, payload);
             })
             .then((res) => {
-                if (res.message !== 'Task will execute asynchronously') {
+                if (res.code !== 202) {
                     return Promise.reject(new Error(`failed to update save sys config task:${JSON.stringify(res)}`));
                 }
 
