@@ -78,7 +78,8 @@ function addDataGroup(path) {
 }
 
 function deleteDataGroup(path) {
-    return executeCommand(`tmsh -a delete ltm data-group internal ${path}`);
+    // only attempt a delete if it exists, with one command to avoid race condition
+    return executeCommand(`if tmsh -a list ltm data-group internal ${path} > /dev/null 2>&1; then tmsh -a delete ltm data-group internal ${path}; fi`);
 }
 
 function itemExists(path) {
@@ -130,6 +131,7 @@ function updateDataGroup(path, records) {
                 return resolve();
             });
         }))
+        // merging the config will overwrite the existing data-group
         .then(() => deleteDataGroup(path))
         .then(() => executeCommand(`tmsh -a load sys config merge file ${configFileName}`))
         .then(() => new Promise((resolve, reject) => {
