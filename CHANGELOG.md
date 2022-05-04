@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.X.X] - 2022-X-XX
 ## Changed
 - Updated the release process documentation
+- Fix race condition where updating data-group fails when it doesn't exist so it cannot be deleted
 
 ## [1.3.2] - 2022-3-18
 ## Changed
