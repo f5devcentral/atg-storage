@@ -5,17 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0]
+## [1.X.X] - 2022-X-XX
+## Changed
+- Updated the release process documentation
+
+## [1.3.2] - 2022-3-18
+## Changed
+- Prevent persist from exiting early, when task is kicked off
+
+## [1.3.1] - 2022-3-11
+## Fixed
+- StorageDataGroup: Speed up persist() by removing unused write cache logic
+
+## [1.3.0] - 2022-1-18
 ## Changed
 - Always save data to data group on write in StorageDataGroup
 
-## [1.2.0]
+## [1.2.0] - 2022-1-7
 ## Added
 - clearCache method
 ## Fixed
 - Fix some security concerns with temporary file usage in StorageDataGroup
 
-## [1.1.0] - 2020-5-6
+## [1.1.0] - 2021-5-6
 ## Added
 - Add StorageJsonFile storage backend to persist on disk using JSON
 ## Fixed
