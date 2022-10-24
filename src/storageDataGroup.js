@@ -81,7 +81,15 @@ function addDataGroup(path) {
 
 function deleteDataGroup(path) {
     // only attempt a delete if it exists, with one command to avoid race condition
-    return executeCommand(`if tmsh -a list ltm data-group internal ${path} > /dev/null 2>&1; then tmsh -a delete ltm data-group internal ${path}; fi`);
+    return executeCommand(`if tmsh -a list ltm data-group internal ${path} > /dev/null 2>&1; then tmsh -a delete ltm data-group internal ${path}; fi`)
+        .catch((err) => {
+            // even with the above 'if' check we still have a race condition where the datagroup can disappear
+            // between the check and the delete operation
+            if (err.message.indexOf('was not found') === -1) {
+                return Promise.reject(err);
+            }
+            return Promise.resolve();
+        });
 }
 
 function itemExists(path) {

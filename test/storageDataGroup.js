@@ -337,6 +337,21 @@ describe('StorageDataGroup', () => {
     });
 
     describe('.deleteItem()', () => {
+        let data = [
+            'ltm data-group internal /storage/data-store {',
+            '    records {',
+            '        hello0 {',
+            '            data eNpTKs8vyklRAgAJ4AJt',
+            '        }',
+            '        world0 {',
+            '            data eNpTKs8vyklRAgAJ4AJt',
+            '        }',
+            '    }',
+            '    partition appsvcs',
+            '    type string',
+            '}'
+        ].join('\n');
+
         it('should not use an empty tmsh modify', () => {
             const storage = createStorageNoCache();
             let deleteOrModifyCalled = false;
@@ -357,6 +372,38 @@ describe('StorageDataGroup', () => {
                     deleteOrModifyCalled,
                     'expected either modify or delete to be called'
                 ));
+        });
+
+        it('should not throw an error if deleting a datagroup that does not exist', () => {
+            const storage = createStorage();
+
+            overrideCommands = {
+                'list ltm data-group': (callback, command) => {
+                    if (command.indexOf('/dev/null') > -1) {
+                        callback(null, null, 'The request value list (/Common/foo) was not found');
+                    } else {
+                        callback(null, data);
+                    }
+                }
+            };
+
+            return storage.deleteItem('hello');
+        });
+
+        it('should throw an error for any other error', () => {
+            const storage = createStorage();
+
+            overrideCommands = {
+                'list ltm data-group': (callback, command) => {
+                    if (command.indexOf('/dev/null') > -1) {
+                        callback(null, null, 'some other error');
+                    } else {
+                        callback(null, data);
+                    }
+                }
+            };
+
+            assert.isRejected(storage.deleteItem('hello'));
         });
     });
 
