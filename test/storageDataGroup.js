@@ -337,7 +337,7 @@ describe('StorageDataGroup', () => {
     });
 
     describe('.deleteItem()', () => {
-        let data = [
+        const data = [
             'ltm data-group internal /storage/data-store {',
             '    records {',
             '        hello0 {',
