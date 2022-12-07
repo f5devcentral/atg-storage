@@ -203,7 +203,6 @@ function waitForCompletion(path, remainingRetries) {
         method: 'GET',
         why: 'checking for task completion',
         headers: {
-            Authorization: `Basic ${Buffer.from('admin:').toString('base64')}`,
             'Content-Type': 'application/json'
         }
     };
@@ -438,7 +437,6 @@ class StorageDataGroup {
                     path: '/mgmt/tm/task/sys/config',
                     method: 'POST',
                     headers: {
-                        Authorization: `Basic ${Buffer.from('admin:').toString('base64')}`,
                         'Content-Type': 'application/json'
                     }
                 };
@@ -460,7 +458,6 @@ class StorageDataGroup {
                     path: `/mgmt/tm/task/sys/config/${taskId}`,
                     method: 'PUT',
                     headers: {
-                        Authorization: `Basic ${Buffer.from('admin:').toString('base64')}`,
                         'Content-Type': 'application/json'
                     }
                 };
