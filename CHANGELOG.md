@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.X.X] - 2022-X-XX
 
+## [1.3.5] - 2022-12-7
+## Changed
+ - Remove auth header when making requests to port 8100 with http. The request module will properly handle the default (which might not be admin)
+
 ## [1.3.4] - 2022-10-24
 - More handling for race condition where updating data-group fails when it doesn't exist so it cannot be deleted
 
