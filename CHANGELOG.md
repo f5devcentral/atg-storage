@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.X.X] - 2022-X-XX
 
+## [1.3.6] - 2022-12-9
+## Changed
+ - Update atg-shared-utilities to make use of primary admin user
+
 ## [1.3.5] - 2022-12-7
 ## Changed
  - Remove auth header when making requests to port 8100 with http. The request module will properly handle the default (which might not be admin)

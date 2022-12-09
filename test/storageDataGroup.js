@@ -10,6 +10,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const promiseUtil = require('@f5devcentral/atg-shared-utilities').promiseUtils;
+const tmshUtil = require('@f5devcentral/atg-shared-utilities/src/tmshUtils');
 
 const StorageDataGroup = require('../src/storageDataGroup');
 
@@ -148,6 +149,12 @@ describe('StorageDataGroup', () => {
                 callback();
             }
         });
+
+        sinon.stub(tmshUtil, 'executeTmshCommand').resolves(
+            {
+                value: '"admin"'
+            }
+        );
     });
 
     afterEach(() => {
