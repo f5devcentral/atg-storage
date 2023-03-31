@@ -49,8 +49,8 @@ function recordsToString(records, baseKey, offset) {
     if (base64String === '') {
         return 'null';
     }
-    const compresedString = fromBase64(base64String);
-    const finalString = zlib.inflateSync(compresedString, ZLIB_OPTIONS).toString();
+    const compressedString = fromBase64(base64String);
+    const finalString = zlib.inflateSync(compressedString, ZLIB_OPTIONS).toString();
     return finalString;
 }
 
