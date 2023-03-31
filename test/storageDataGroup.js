@@ -45,6 +45,8 @@ describe('StorageDataGroup', () => {
             '        }',
             '    }',
             '    partition appsvcs',
+            '    description this is my group',
+            '    app-service my app service',
             '    type string',
             '}'
         ].join('\n');
