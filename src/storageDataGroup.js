@@ -166,6 +166,9 @@ function outputToObject(output) {
         .replace(/(\s*)data (.*?)(\s*)}/gm, '$1"data": "$2"$3}')
         .replace(/^( {4}})/m, '$1,')
         .replace(/partition (.*)/, '"partition": "$1",')
+        .replace(/app-service (.*)/, '"app-service": "$1",')
+        .replace(/description (.*)/, '"description": "$1",')
+        .replace(/records (.*)/, '"records": "$1",')
         .replace('type string', '"type": "string"');
     return JSON.parse(jsonString);
 }
