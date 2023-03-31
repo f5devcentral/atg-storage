@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.X.X] - 2022-X-XX
 
+## [1.3.7] - 2023-3-31
+## Fixed
+ - AUTOTOOL-3581: Data group load fails when cli preference list-all-properties is enabled
+
 ## [1.3.6] - 2022-12-9
 ## Changed
  - Update atg-shared-utilities to make use of primary admin user

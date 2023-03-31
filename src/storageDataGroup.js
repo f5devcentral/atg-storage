@@ -49,8 +49,8 @@ function recordsToString(records, baseKey, offset) {
     if (base64String === '') {
         return 'null';
     }
-    const compresedString = fromBase64(base64String);
-    const finalString = zlib.inflateSync(compresedString, ZLIB_OPTIONS).toString();
+    const compressedString = fromBase64(base64String);
+    const finalString = zlib.inflateSync(compressedString, ZLIB_OPTIONS).toString();
     return finalString;
 }
 
@@ -166,6 +166,9 @@ function outputToObject(output) {
         .replace(/(\s*)data (.*?)(\s*)}/gm, '$1"data": "$2"$3}')
         .replace(/^( {4}})/m, '$1,')
         .replace(/partition (.*)/, '"partition": "$1",')
+        .replace(/app-service (.*)/, '"app-service": "$1",')
+        .replace(/description (.*)/, '"description": "$1",')
+        .replace(/records (.*)/, '"records": "$1",')
         .replace('type string', '"type": "string"');
     return JSON.parse(jsonString);
 }
@@ -321,7 +324,8 @@ class StorageDataGroup {
                     this.cache = data;
                 }
                 return data;
-            });
+            })
+            .catch(err => Promise.reject(new Error(`Unable to read data group ${this.path}: ${err.message}`)));
     }
 
     _getRecords() {

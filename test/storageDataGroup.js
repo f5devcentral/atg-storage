@@ -45,6 +45,8 @@ describe('StorageDataGroup', () => {
             '        }',
             '    }',
             '    partition appsvcs',
+            '    description this is my group',
+            '    app-service my app service',
             '    type string',
             '}'
         ].join('\n');
@@ -266,6 +268,16 @@ describe('StorageDataGroup', () => {
                     assert.ok(ensureFolderSpy.calledOnce);
                     assert.ok(ensureDataGroupSpy.calledOnce);
                 });
+        });
+    });
+
+    describe('.getData()', () => {
+        it('should reject if readDataGroup throws', () => {
+            const storage = createStorage();
+
+            sinon.stub(JSON, 'parse').throws(new Error('error parsing json'));
+            const errorString = 'Unable to read data group /storage/data-store: error parsing json';
+            return assert.isRejected(storage._getData(), errorString);
         });
     });
 
