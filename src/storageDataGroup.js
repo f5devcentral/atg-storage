@@ -324,7 +324,8 @@ class StorageDataGroup {
                     this.cache = data;
                 }
                 return data;
-            });
+            })
+            .catch(err => Promise.reject(new Error(`Unable to read data group ${this.path}: ${err.message}`)));
     }
 
     _getRecords() {

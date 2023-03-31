@@ -271,6 +271,16 @@ describe('StorageDataGroup', () => {
         });
     });
 
+    describe('.getData()', () => {
+        it('should reject if readDataGroup throws', () => {
+            const storage = createStorage();
+
+            sinon.stub(JSON, 'parse').throws(new Error('error parsing json'));
+            const errorString = 'Unable to read data group /storage/data-store: error parsing json';
+            return assert.isRejected(storage._getData(), errorString);
+        });
+    });
+
     describe('.setItem()', () => {
         it('should reject if exec throws', () => {
             const storage = createStorage();
