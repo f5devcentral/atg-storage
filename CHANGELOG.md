@@ -5,9 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.X.X] - 2022-X-XX
+## [1.X.X] - 2023-X-XX
 
-## [1.3.9] - 2023-3-31
+## [1.3.9] - 2023-4-25
 ## Fixed
  - Update packages
 
@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
  - AUTOTOOL-3581: Data group load fails when cli preference list-all-properties is enabled
 
-## [1.3.7] - 2023-3-31
+## [1.3.7] - 2022-12-14
 ## Changed
  - Update packages
 
