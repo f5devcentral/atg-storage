@@ -7,6 +7,8 @@ To check unit test coverage run: `npm run coverage`
 
 To run the linter run: `npm run lint`
 
+* Note: Node v14 or lower must be used when running source tests. Newer versions of Node will result in an Uncaught TypeError due to constraints involving the Nock package version. Consider using Node Version Manager (NVM) to quickly switch between Node versions.
+
 ## How to submit changes
 Thank you for considering contributing changes to this repository.
 If you have some changes you wish to submit, please fork the repository and submit a pull request.

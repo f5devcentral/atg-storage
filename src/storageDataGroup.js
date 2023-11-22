@@ -113,7 +113,7 @@ function dataGroupExists(path) {
 
 function updateDataGroup(path, records) {
     const tmshRecords = records
-        .map(record => `${record.name} { data ${record.data} }`)
+        .map(record => `"${record.name}" { data ${record.data} }`)
         .join('\n        ')
         .replace(/{ /g, '{\n            ')
         .replace(/ }/g, '\n        }');
@@ -161,7 +161,7 @@ function readDataGroup(path) {
 function outputToObject(output) {
     const jsonString = output
         .replace(/ltm data-group internal .*? {/, '{')
-        .replace(/(\s*)(.*?) {/g, '$1"$2" : {')
+        .replace(/(\s*)("?)(.*?)("?) {/g, '$1"$3" : {')
         .replace(/( {8}})(\s*")/gm, '$1,$2')
         .replace(/(\s*)data (.*?)(\s*)}/gm, '$1"data": "$2"$3}')
         .replace(/^( {4}})/m, '$1,')

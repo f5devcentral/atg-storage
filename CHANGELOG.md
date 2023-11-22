@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.X.X] - 2023-X-XX
+## Fixed
+ - EC-386: Multiple data group records created from one that is named with spaces
 
 ## [1.3.9] - 2023-4-25
 ## Fixed
