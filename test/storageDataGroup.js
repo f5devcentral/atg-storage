@@ -30,6 +30,7 @@ describe('StorageDataGroup', () => {
     let tmshCommands = {};
     let defaultCommands = {};
     let overrideCommands = null;
+    let getLastDatagroupFileContents;
 
     beforeEach(() => {
         let isFolderCreated = false;
@@ -50,6 +51,7 @@ describe('StorageDataGroup', () => {
             '    type string',
             '}'
         ].join('\n');
+        getLastDatagroupFileContents = () => data;
         defaultCommands = {
             'create sys folder': (callback) => {
                 if (isFolderCreated) {
@@ -87,39 +89,12 @@ describe('StorageDataGroup', () => {
                 data = '';
                 callback();
             },
-            'modify ltm data-group': (callback, command) => {
-                if (command.match(/replace-all-with {\s*}/)) {
-                    assert(false, 'empty replace-all-with not supported by tmsh');
-                }
-
-                let newData = command.split(' replace-all-with ')[1];
-                assert(newData, `got bad modify command ${command}`);
-                newData = newData
-                    .replace(/(^{ | }$)/gm, '')
-                    .replace(/(\w* { )/gm, '        $1\n             ')
-                    .replace(/ }/gm, '\n        }\n');
-
-                data = [].concat(
-                    [
-                        'ltm data-group internal /storage/data-store {',
-                        '    records {'
-                    ],
-                    [newData],
-                    [
-                        '    }',
-                        '    partition appsvcs',
-                        '    type string',
-                        '}'
-                    ]
-                ).join('\n');
-
-                callback();
-            },
             'load sys config merge file': (callback, command) => {
                 if (isDataGroupCreated) {
                     throw new Error('data group already exists');
                 }
                 const filePath = command.split('merge file ')[1];
+
                 assert(filePath, `got bad load sys config merge file command ${command}`);
 
                 data = fs.readFileSync(filePath, { encoding: 'utf8' });
@@ -316,6 +291,14 @@ describe('StorageDataGroup', () => {
 
             return assert.isRejected(storage.setItem('test'), errorString);
         });
+
+        it('should not create multiple records if name has a space', () => {
+            const storage = createStorage();
+
+            return Promise.resolve()
+                .then(() => storage.setItem('hello world', 'foobar'))
+                .then(() => assert.match(getLastDatagroupFileContents(), /"hello world0" \{\n\s*data /));
+        });
     });
 
     describe('.getItem()', () => {
@@ -375,10 +358,6 @@ describe('StorageDataGroup', () => {
             const storage = createStorageNoCache();
             let deleteOrModifyCalled = false;
 
-            tmshCommands['modify ltm data-group'] = (callback, command) => {
-                deleteOrModifyCalled = true;
-                defaultCommands['modify ltm data-group'](callback, command);
-            };
             tmshCommands['delete ltm data-group'] = (callback, command) => {
                 deleteOrModifyCalled = true;
                 defaultCommands['delete ltm data-group'](callback, command);
