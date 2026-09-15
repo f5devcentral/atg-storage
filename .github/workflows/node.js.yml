@@ -28,9 +28,13 @@ jobs:
         node-version: [6.x, 8.x, 10.x, 12.x, 14.x, 16.x]
     steps:
     - uses: actions/checkout@v2
+    - name: Use Node.js 16.x (for npm ci)
+      uses: actions/setup-node@v1
+      with:
+        node-version: 16.x
+    - run: npm ci
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: if [ $( npm --version | cut -d . -f 1) -lt 6 ]; then npm install; else npm ci; fi
     - run: npm run test
